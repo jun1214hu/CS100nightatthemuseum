@@ -91,22 +91,35 @@ function showObjectsTable(id) {
 }
 
 function moreObjects(obj_url) {
-    fetch(obj_url)
-        .then(objResponse => objResponse.json())
-        .then(objData => {
-            objData.records.forEach(object => {
-                var allpeople = "";
 
-                if (object.people !== "null") {
-                    object.people.forEach(person => {
-                        allpeople += person.name + ", ";
-                    });
-                } else {
-                    allpeople = "None found";
-                }
+    if (typeof(Storage !== "undefined") && sessionStorage.getItem(obj_url)) {
+        var cachedData = sessionStorage.getItem(obj_url);
+        parseObjectData(JSON.parse(cachedData));
+    }
+    else {
+        fetch(obj_url)
+            .then(objResponse => objResponse.json())
+            .then(objData => {
 
+                sessionStorage.setItem(obj_url, JSON.stringify(objData));
+                parseObjectData(objData);
+            });
+    }
+}
 
-                document.querySelector("#objects").innerHTML += `
+function parseObjectData (objData) {
+                objData.records.forEach(object => {
+                    var allpeople = "";
+
+                    if (object.people !== "null") {
+                        object.people.forEach(person => {
+                            allpeople += person.name + ", ";
+                        });
+                    } else {
+                        allpeople = "None found";
+                    }
+
+                    document.querySelector("#objects").innerHTML += `
                                     <li>
                                     <a href="#${object.objectnumber}" onclick="showSingleTable('${object.objectnumber}')">
                                     Title: ${object.title}.
@@ -121,12 +134,12 @@ function moreObjects(obj_url) {
                                     <br>
                                     </li>
                                     `;
-            });
-            if (objData.info.next) {
-                moreObjects(objData.info.next);
+                });
+                if (objData.info.next) {
+                    moreObjects(objData.info.next);
+                }
             }
-        });
-}
+
 
 
 function showSingleTable(id) {
@@ -162,6 +175,7 @@ function showSingleTable(id) {
             });
         });
 }
+
 
 
 
