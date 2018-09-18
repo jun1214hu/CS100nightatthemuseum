@@ -2,25 +2,40 @@ const API_KEY = "8d33e1b0-b77e-11e8-bf0e-e9322ccde4db";
 
 document.addEventListener("DOMContentLoaded", () => {
     const url = `https://api.harvardartmuseums.org/gallery?apikey=${API_KEY}`;
-    showGalleries(url);
+    var hash = location.hash
+
+    if (hash && hash === 'ITERATE OVER EXISTING HASHES') {
+        window.location = "THE URL THAT MATCHES THAT HASH"
+    }
+    else {
+        showGalleries(url);
+    }
+
+
+
 });
 
-// // Every time the URL changss
-// window.onhashchange = () => {
-//     window.addEventListener( () => {
-//
-//         if (window.location.hash) {
-//             let hash = window.location.hash.slice(1);
-//             urlChange(hash);
-//         }
-//     })
-// }
-//
-// function urlChange(hash)
-// {
-//     new_url = `href=`
-//         window.location.hash = hash;
-// }
+// Every time the URL changes, save that URL as a hash with that address
+window.onhashchange = () => {
+        // if there's a URL then change to that API address
+    if (window.location.hash) {
+        let firstHash = window.location.hash.slice(1);
+    // go to that API address and display whatever
+    }
+
+    // if there isn't hash then add one?
+}
+        window.location.hash.slice(1);
+// URL change function
+function urlChange(hash)
+{
+    console.log(hash);
+
+    if (!hash.indexOf('.') > -1)
+    {
+        showObjectsTable(hash);
+    }
+}
 
 function goBackToGallery() {
     document.querySelector("#all-objects").style.display = "none";
