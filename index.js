@@ -143,19 +143,29 @@ function parseObjectData (objData) {
 
 
 function showSingleTable(id) {
-
     document.querySelector("#single-object").style.display = "block";
     document.querySelector("#all-objects").style.display = "none";
     document.querySelector("#all-galleries").style.display = "none";
 
-
     const obj_url = `https://api.harvardartmuseums.org/object?apikey=${API_KEY}&objectnumber=${id}`;
 
+    if (typeof(Storage !== "undefined") && sessionStorage.getItem(obj_url)) {
+        var cachedData = sessionStorage.getItem(obj_url);
+        parseSingleData(JSON.parse(cachedData));
+    }
+    else {
     fetch(obj_url)
         .then(objResponse => objResponse.json())
         .then(objData => {
-            objData.records.forEach(object => {
-                document.querySelector("#single").innerHTML = `
+            sessionStorage.setItem(obj_url, JSON.stringify(objData));
+            parseSingleData(objData);
+        });
+}
+}
+
+function parseSingleData(objData) {
+    objData.records.forEach(object => {
+        document.querySelector("#single").innerHTML = `
                                     <strong> Title: </strong> ${object.title}
                                     <br>
                                     <img src="${object.primaryimageurl}" class="picture">
@@ -172,8 +182,7 @@ function showSingleTable(id) {
                                     <br>
                                     <a href="${object.url}"> ${object.url} </a>
                                     <br>`;
-            });
-        });
+    });
 }
 
 
