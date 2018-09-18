@@ -8,9 +8,8 @@ document.addEventListener("DOMContentLoaded", () => {
 
 
     // if there is a hash and the hash is saved, then go to the location
-    // REfine later, because a hash alone should be treated like the base URL
-    if (hash) { // (hash && hash === 'ITERATE OVER EXISTING HASHES') {
-
+    if (hash) {
+        // if the hash has a dot then it's probably an object
         if (hash.indexOf('.') > -1) {
             showSingleTable(hash.substring(1));
         }
@@ -22,38 +21,14 @@ document.addEventListener("DOMContentLoaded", () => {
     }
 });
 
-// Every time the URL changes, save that URL as a hash with that address
-window.onhashchange = () => {
-    // if there's a URL then change to that API address
-    if (window.location.hash) {
-        let firstHash = window.location.hash.slice(1);
-        // go to that API address and display whatever
-        console.log(firstHash);
-    }
-
-    // if there isn't hash then add one?
-}
-
-// make sure storage
-
-
-// URL change function
-// function urlChange(hash)
-// {
-//     // console.log(hash);
-
-//     if (!hash.indexOf('.') > -1)
-//     {
-//         showObjectsTable(hash);
-//     }
-// }
-
+// go back button in ShowObjectsTable
 function goBackToGallery() {
     document.querySelector("#all-objects").style.display = "none";
     document.querySelector("#all-galleries").style.display = "block";
     document.querySelector("#single-object").style.display = "none";
 }
 
+// go back button in ShowSingleObject
 function goBackToObject() {
     document.querySelector("#all-objects").style.display = "block";
     document.querySelector("#all-galleries").style.display = "none";
@@ -62,16 +37,22 @@ function goBackToObject() {
 
 
 function showGalleries(url) {
+    // Make sure the site is available in local storage
+    // if the page has been loaded before
     if (typeof(Storage !== "undefined") && sessionStorage.getItem(url)) {
+        // store the url of the current page then use the existing cache
         var cachedData = sessionStorage.getItem(url);
-        console.log("cache data" + cachedData);
+        // Parse and display the existing JSON in local storage
         parseGalleryData(JSON.parse(cachedData));
     }
+    // if the url has not been used before
     else {
         fetch(url)
             .then(response => response.json())
             .then(data => {
+                // add the url and JSON contents
                 sessionStorage.setItem(url, JSON.stringify(data));
+                // Parse and display the new data
                 parseGalleryData(data);
             });
     }
@@ -79,10 +60,8 @@ function showGalleries(url) {
 
 // parse gallery data if it does not already exist
 function parseGalleryData(data) {
-    console.log("parse gallery" + data)
-    window.mud=data
-    data.records.forEach(gallery => {
 
+    data.records.forEach(gallery => {
         document.querySelector("#galleries").innerHTML += `
         <li>
           <a href="#${gallery.id}" onclick="showObjectsTable(${gallery.id})">
