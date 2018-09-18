@@ -2,40 +2,51 @@ const API_KEY = "8d33e1b0-b77e-11e8-bf0e-e9322ccde4db";
 
 document.addEventListener("DOMContentLoaded", () => {
     const url = `https://api.harvardartmuseums.org/gallery?apikey=${API_KEY}`;
+
+    // get the hash from the URL
     var hash = location.hash
 
-    if (hash && hash === 'ITERATE OVER EXISTING HASHES') {
-        window.location = "THE URL THAT MATCHES THAT HASH"
+
+    // if there is a hash and the hash is saved, then go to the location
+    // REfine later, because a hash alone should be treated like the base URL
+    if (hash) { // (hash && hash === 'ITERATE OVER EXISTING HASHES') {
+
+        if (hash.indexOf('.') > -1) {
+            showSingleTable(hash.substring(1));
+        }
+        showObjectsTable(hash.substring(1));
     }
     else {
+        // otherwise go to the first page
         showGalleries(url);
     }
-
-
-
 });
 
 // Every time the URL changes, save that URL as a hash with that address
 window.onhashchange = () => {
-        // if there's a URL then change to that API address
+    // if there's a URL then change to that API address
     if (window.location.hash) {
         let firstHash = window.location.hash.slice(1);
-    // go to that API address and display whatever
+        // go to that API address and display whatever
+        console.log(firstHash);
     }
 
     // if there isn't hash then add one?
 }
-        window.location.hash.slice(1);
-// URL change function
-function urlChange(hash)
-{
-    console.log(hash);
 
-    if (!hash.indexOf('.') > -1)
-    {
-        showObjectsTable(hash);
-    }
-}
+// make sure storage
+
+
+// URL change function
+// function urlChange(hash)
+// {
+//     // console.log(hash);
+
+//     if (!hash.indexOf('.') > -1)
+//     {
+//         showObjectsTable(hash);
+//     }
+// }
 
 function goBackToGallery() {
     document.querySelector("#all-objects").style.display = "none";
@@ -49,29 +60,45 @@ function goBackToObject() {
     document.querySelector("#single-object").style.display = "none";
 }
 
+
 function showGalleries(url) {
-    fetch(url)
-        .then(response => response.json())
-        .then(data => {
-            data.records.forEach(gallery => {
-
-                // x += x.assign(location.hash);
-
-                document.querySelector("#galleries").innerHTML += `
-            <li>
-              <a href="#${gallery.id}" onclick="showObjectsTable(${gallery.id})">
-                Gallery #${gallery.id}: ${gallery.name} (Floor ${gallery.floor})
-              </a>
-            </li>
-          `;
+    if (typeof(Storage !== "undefined") && sessionStorage.getItem(url)) {
+        var cachedData = sessionStorage.getItem(url);
+        console.log("cache data" + cachedData);
+        parseGalleryData(JSON.parse(cachedData));
+    }
+    else {
+        fetch(url)
+            .then(response => response.json())
+            .then(data => {
+                sessionStorage.setItem(url, JSON.stringify(data));
+                parseGalleryData(data);
             });
-
-            if (data.info.next) {
-                showGalleries(data.info.next);
-            }
-
-        });
+    }
 }
+
+// parse gallery data if it does not already exist
+function parseGalleryData(data) {
+    console.log("parse gallery" + data)
+    window.mud=data
+    data.records.forEach(gallery => {
+
+        document.querySelector("#galleries").innerHTML += `
+        <li>
+          <a href="#${gallery.id}" onclick="showObjectsTable(${gallery.id})">
+            Gallery #${gallery.id}: ${gallery.name} (Floor ${gallery.floor})
+          </a>
+        </li>
+      `;
+    });
+
+    if (data.info.next) {
+        showGalleries(data.info.next);
+    }
+
+}
+
+
 
 
 function showObjectsTable(id) {
